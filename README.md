@@ -20,3 +20,34 @@ https://github.com/plinth666/epsonsimplecups
 https://github.com/nemik/epson-tm-t20-cups
 ```
 
+## Cups administration
+
+[Command line administration programs](https://www.cups.org/doc/admin.html)
+
+
+[Command line options](https://www.cups.org/doc/options.html)
+
+### Native Epson Deiver
+```
+lpadmin -u allow:all -p tmt -i /usr/share/cups/model/epson/EpsonTMT20Simple.ppd.gz -v usb://EPSON/TM-T20III?serial=583741560358950000
+```
+
+```
+cupsenable tmt
+```
+
+```
+cupsaccept tmt
+```
+
+```
+lpadmin -d tmt
+```
+
+
+### Alternative driver
+```
+lpadmin -p tmt -i /usr/share/cups/model/tm-t20ii-rastertotmt.ppd -v usb://EPSON/TM-T20III?serial=583741560358950000
+```
+
+

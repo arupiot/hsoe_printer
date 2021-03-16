@@ -1,7 +1,7 @@
 #/usr/bin/env python3
 
-from os import system, environ, putenv, getenv, environ
-from os.path import exists
+from os import system, environ, putenv, getenv, environ, listdir
+from os.path import exists, join
 import random
 from time import sleep
 from PIL import Image, ImageDraw, ImageFont
@@ -12,6 +12,7 @@ from pygame.locals import *
 TXT_FILE = "/opt/text/text.txt"
 PRINTER_NAME = "tmt" 
 INTERVAL_SECONDS = 5
+MAX_CHARACTERS = 20
 
 sleep(0.75)
 pygame.display.init()
@@ -21,7 +22,7 @@ display_info = pygame.display.Info()
 SCREEN_WIDTH = display_info.current_w
 SCREEN_HEIGHT = display_info.current_h
 DIM = (SCREEN_WIDTH, SCREEN_HEIGHT)
-FONT_SIZE = int(SCREEN_HEIGHT/10)
+FONT_SIZE = int(SCREEN_HEIGHT/8)
 
 print(DIM)
 
@@ -41,9 +42,7 @@ YELLOW     = (255, 255,   0)
 PINK       = (255, 192, 203)
 LBLUE      = (191, 238, 244)
 
-
 lcd = None
-
 
 class Alarm(Exception):
     pass
@@ -64,6 +63,19 @@ def alarm_handler(signum, frame):
     pygame.display.set_caption('Drawing')
 
 
+def split_into_lines(sentence):
+    words = sentence.split()
+    lines = [""]
+    l = 0
+    for word in words:
+        if len(lines[l]) <= MAX_CHARACTERS:
+            lines[l] += word + " "
+        else:
+            l += 1
+            lines.append(word + " ")
+    return(lines)
+
+
 def main():
    global FONT_SIZE
    global lcd
@@ -76,22 +88,37 @@ def main():
       raise KeyboardInterrupt
    pygame.mouse.set_visible(False)
    lcd.fill((0,0,0))
+
+   # get fonts
+   font_files = listdir("fonts")
+   fonts = []
+   for font_name in font_files:
+       print(font_name)
+       fonts.append(ImageFont.truetype(join("fonts", font_name), FONT_SIZE))
+
+
    if exists(TXT_FILE):
        f = open(TXT_FILE)
        lines = f.readlines()
        n = len(lines)
        while True:
            i = int(random.random()*n)
+           f = int(random.random()*len(fonts))
            print(lines[i])
-           #system('echo "%s" | lp -d %s' % (lines[i], PRINTER_NAME))
+           sentence_lines = split_into_lines(lines[i])
+           print(sentence_lines)
            # create an image
-           out = Image.new("RGB", (400, 800), (255, 255, 255))
+           out = Image.new("RGB", (SCREEN_WIDTH , SCREEN_HEIGHT), (255, 255, 255))
            # get a font
-           fnt = ImageFont.truetype("fonts/Lobster_1.3.otf", FONT_SIZE)
+           #fnt = ImageFont.truetype("fonts/Lobster_1.3.otf", FONT_SIZE)
            # get a drawing context
            d = ImageDraw.Draw(out)
            # draw multiline text
-           d.multiline_text((10,10), lines[i], font=fnt, fill=(0, 0, 0))
+           j = 0
+           step = FONT_SIZE
+           for sentence_line in sentence_lines:
+                d.text((10,step+step*j), sentence_line, font=fonts[f], fill=(0, 0, 0))
+                j += 1
            out.show()
            image_name = "tmp.jpg"
            out.save(image_name)
@@ -99,6 +126,7 @@ def main():
            #strFormat = 'RGBA'
            #raw_str = out.tostring("raw", strFormat)
            #surface = pygame.image.fromstring(raw_str, out.size, strFormat)
+           system("lp -d %s tmp.jpg" % PRINTER_NAME)
            image = pygame.image.load(image_name)
            resized_image = pygame.transform.scale(image, (SCREEN_WIDTH, SCREEN_HEIGHT))
            pygame.display.flip()

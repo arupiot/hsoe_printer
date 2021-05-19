@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+  player:
+    container_name: printer
+    image: "arupiot/hsoe-printer:latest"
+    privileged: true
+    volumes:
+       - /opt/images:/opt/images
+    restart: always
+    ports:
+      - "631:631"
+    environment:
+      - PRINTER_NAME=tmt
+      - IMAGES_PATH=/opt/images
+      - IMAGES_EXT=.png
+      - PRINTING_INTERVAL=1200

@@ -13,7 +13,7 @@ RUN curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python3
 RUN python3 -m pip install --trusted-host pypi.python.org -r requirements.txt
 
 # execute the audio player program
-COPY play_images.py play_images.py
-CMD ["python3", "play_images.py"]
+COPY print_images.py print_images.py
+CMD ["python3", "print_images.py"]
 
 RUN [ "cross-build-end" ]

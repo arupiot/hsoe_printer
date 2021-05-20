@@ -2,11 +2,17 @@ version: '2'
 
 services:
   player:
+    network_mode: "host"
     container_name: printer
     image: "arupiot/hsoe-printer:latest"
     privileged: true
     volumes:
-       - /opt/images:/opt/images
+      - /opt/images:/opt/images
+      - /var/run/dbus:/var/run/dbus
+      - /dev/bus/usb:/dev/bus/usb
+      - config:/etc/cups
+      - cache:/var/cache/cups
+      - log:/var/log/cups
     restart: always
     ports:
       - "631:631"
@@ -15,3 +21,5 @@ services:
       - IMAGES_PATH=/opt/images
       - IMAGES_EXT=.png
       - PRINTING_INTERVAL=1200
+  build:
+    network: host
